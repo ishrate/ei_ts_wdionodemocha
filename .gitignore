@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test Output (Generated files - exclude from Git)
+test-output/
+screenshots/
+logs/
+allure-results/
+allure-report/
+reports/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output/
+
+# Docker files (optional)
+.dockerignore
+
+# Package locks (choose one)
+# package-lock.json
+# yarn.lock
