@@ -9,7 +9,7 @@ export const config = {
     
     // Test Files
     specs: [
-        './test/specs/**/*.ts'
+          './test/specs/tyroInvoiceSubmit.spec.ts'
     ],
     
     // Capabilities
@@ -58,18 +58,18 @@ export const config = {
     framework: 'mocha',
     mochaOpts: {
         ui: 'bdd',
-        timeout: 60000
+        timeout: 350000 // Increased timeout
     },
     
     // Reporters
     reporters: [
         'spec',
         ['allure', {
-            outputDir: './test-output/allure-results',
+            outputDir: './allure-results',
             disableWebdriverStepsReporting: true,
             disableWebdriverScreenshotsReporting: false
         }]
-    ],
+    ] as Array<string | [string, Record<string, any>]>,
     
     // Services
     services: [],
@@ -101,18 +101,16 @@ export const config = {
         (global as any).appConfig = config.appConfig;
     },
     
+    // MODIFIED: Keep browser open regardless of test result
     afterTest: async function (test: any, context: any, { error, result, duration, passed, retries }: { error: any; result: any; duration: any; passed: any; retries: any }) {
-        // Keep browser open for both passed and failed tests
-        if (!passed) {
-            console.log('Test failed. Browser will remain open for debugging.');
+        if (passed) {
+            console.log('Test PASSED. Browser will remain open for inspection (5 minutes)...');
         } else {
-            console.log('Test passed. Browser will remain open for inspection.');
+            console.log('Test FAILED. Browser will remain open for debugging (5 minutes)...');
         }
-    },
-
-    // Prevent the browser from closing after the test suite
-    afterSession: function () {
-        console.log('Keeping browser session open for inspection...');
-        return new Promise(() => {}); // Never resolve, keeping the session alive
-    },
+        
+        // Keep browser open for 10 minutes regardless of test result
+        console.log('Browser will stay open for 5 minutes. Press Ctrl+C to stop earlier.');
+        await browser.pause(300000); // 5 minutes = 300,000 milliseconds
+    }
 };

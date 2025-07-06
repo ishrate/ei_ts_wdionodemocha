@@ -14,7 +14,9 @@ class XmlDataReader {
    * @returns Promise<any> - Parsed XML data object
    */
   async readSearchData(fileName: string = 'searchData.xml'): Promise<any> {
-    const filePath = path.join(__dirname, '../../resources/data', fileName);
+    const filePath = path.join(__dirname, '../data', fileName);
+    
+    console.log('Reading XML from:', filePath);
     
     try {
       const xmlContent = fs.readFileSync(filePath, 'utf8');
@@ -145,6 +147,49 @@ class XmlDataReader {
     }
     
     throw new Error(`No test cases found in XML file: ${fileName}`);
+  }
+
+  /**
+   * Get all key-value pairs for a section from any XML file in /data.
+   * @param fileName - XML file name (e.g., 'invoiceData.xml')
+   * @param section - Section/tag to retrieve (e.g., 'standardInvoice')
+   * @returns Promise<Record<string, string>>
+   */
+  async getSectionData(fileName: string, section: string): Promise<Record<string, string>> {
+    // Adjust the path if your data folder is different
+    const filePath = path.join(__dirname, '../data', fileName);
+    console.log('Reading XML from:', filePath);
+
+    try {
+      const xmlContent = fs.readFileSync(filePath, 'utf8');
+      return new Promise((resolve, reject) => {
+        parseString(xmlContent, (err, result) => {
+          if (err) {
+            reject(new Error(`Failed to parse XML file ${fileName}: ${err.message}`));
+          } else {
+            // result.testData[section][0] is the section object
+            if (
+              result &&
+              result.testData &&
+              result.testData[section] &&
+              result.testData[section][0]
+            ) {
+              const sectionObj = result.testData[section][0];
+              const data: Record<string, string> = {};
+              for (const key of Object.keys(sectionObj)) {
+                data[key] = sectionObj[key][0];
+              }
+              resolve(data);
+            } else {
+              reject(new Error(`Section ${section} not found in ${fileName}`));
+            }
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error reading XML file:', error);
+      throw new Error(`Failed to read XML file ${fileName}: ${error}`);
+    }
   }
 }
 

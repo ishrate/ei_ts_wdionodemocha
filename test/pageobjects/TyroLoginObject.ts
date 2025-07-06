@@ -14,26 +14,25 @@ class LoginPageObject extends BasePage {
   // Login Button
   readonly LOGIN_BUTTON_XPATH = '//button[contains(text(), "LOGIN") or @type="submit"]';
   
-  /**
-   * Username input field locator 
-   */
-  get usernameInput() {
-    return $(this.USEREMAIL_INPUT);
-  }
+//  get usernameInput(): WebdriverIO.Element {
+//     return $('#username'); // or your actual selector
+//   }
+//   get passwordInput(): WebdriverIO.Element {
+//     return $('#password');
+//   }
+//   get loginButton(): WebdriverIO.Element {
+//     return $('#loginBtn');
+//   }
 
-  /**
-   * Password input field locator
-   */
-  get passwordInput() {
-    return $(this.PASSWORD_INPUT);
-  }
-
-  /**
-   * Login button locator (Most Effective for Tyro)
-   */
-  get loginButton() {
-    return $(this.LOGIN_BUTTON_XPATH);
-  }
+get usernameInput() {
+  return $(this.USEREMAIL_INPUT); // or your actual selector
+}
+get passwordInput() {
+  return $(this.PASSWORD_INPUT); // or your actual selector
+}
+get loginButton() {
+  return $(this.LOGIN_BUTTON_XPATH);
+}
 
   /**
    * Login form container

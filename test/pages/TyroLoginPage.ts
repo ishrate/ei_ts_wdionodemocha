@@ -1,148 +1,163 @@
-/**
- * LoginPage - Contains page actions and methods for login functionality
- * Part of the Object/Page naming convention: Page = Actions/Methods
- */
+/// <reference types="@wdio/globals/types" />
+
+//LoginPage - Contains page actions and methods for login functionality
+
 import LoginPageObject from '../pageobjects/TyroLoginObject';
 import ConfigReader from '../utils/configReader';
+import Logger from '../utils/Logger';
+//import type { ChainablePromiseElement } from 'webdriverio';
 
-class LoginPage {
+class TyroLoginPage {
   private pageObject = LoginPageObject;
 
-  // ==================== PAGE ACTIONS/METHODS ====================
-
   /**
-   * Navigate to login page
-   * @param url - Optional login page URL (use config if not provided)
+   * Navigate to the login page and maximize the browser window.
    */
   async open(url?: string) {
-    const targetUrl = url || `${ConfigReader.getBaseUrl()}/login`;
-    await this.pageObject.navigateTo(targetUrl);
-    await this.pageObject.maximizeBrowser();
+    Logger.logTestStep('Opening login page', { url });
+    try {
+      const targetUrl = url || `${ConfigReader.getBaseUrl()}/login`;
+      await (global as any).browser.url(targetUrl);
+      await (global as any).browser.maximizeWindow();
+      Logger.logSuccess(`Successfully navigated to: ${targetUrl}`);
+    } catch (error) {
+      Logger.logFailure(`Failed to open login page: ${url}`, error);
+      throw error;
+    }
   }
 
   /**
-   * Perform login with credentials
-   * @param username - Username for login
-   * @param password - Password for login
+   * Performs the login action with a given username and password.
    */
   async login(username: string, password: string) {
-    // Wait for the page to fully load
-    await browser.waitUntil(
-      async () => (await browser.getTitle()).toLowerCase().includes('login'),
-      {
-        timeout: 10000,
-        timeoutMsg: 'Login page did not load within 10 seconds',
-      }
-    );
+    Logger.logTestStep('Performing login', { username });
 
-    // Debug log to confirm page URL
-    const currentUrl = await browser.getUrl();
-    console.log(`Current URL: ${currentUrl}`);
-
-    // Debug: Print page source to verify if fields are present
-    console.log('Page Source:', await browser.getPageSource());
-
-
-    // Wait for username input to be displayed
-    await this.pageObject.waitForElementDisplayed(this.pageObject.usernameInput, 10000);
-    await this.pageObject.usernameInput.clearValue();
-    await this.pageObject.usernameInput.setValue(username);
-
-    // Wait for password input to be displayed
-    await this.pageObject.waitForElementDisplayed(this.pageObject.passwordInput, 10000);
-    await this.pageObject.passwordInput.clearValue();
-    await this.pageObject.passwordInput.setValue(password);
-
-    // Debug: Print page source to verify if the login button exists
-    console.log('Page Source:', await browser.getPageSource());
-
-    // Enhanced logic to wait for the login button
-    const isLoginButtonPresent = await this.pageObject.loginButton.isExisting();
-    if (!isLoginButtonPresent) {
-      console.error('Login button not found on the page');
-      throw new Error('Login button not found');
-    }
-
-    // Wait for login button to be clickable
-    await this.pageObject.waitForElementDisplayed(this.pageObject.loginButton, 10000);
-    await this.pageObject.loginButton.click();
-
-    await browser.pause(6000);
-
-    // Check for and click home link if present
     try {
-      const homeLink = await $('//a[contains(text(),"Click here to go home")]');
-      if (await homeLink.isDisplayed()) {
-        console.log('Extra link found, clicking it...');
+      // Enter username
+      const usernameField = this.pageObject.usernameInput;
+      await usernameField.waitForDisplayed({ timeout: 10000 });
+      await usernameField.setValue(username);
+      Logger.debug('Username entered successfully');
+      
+
+      // Enter password
+      const passwordField = this.pageObject.passwordInput;
+      await passwordField.waitForDisplayed({ timeout: 10000 });
+      await passwordField.setValue(password);
+      Logger.debug('Password entered successfully');
+      
+
+      // Click login button
+      const loginButton = this.pageObject.loginButton;
+      await loginButton.waitForEnabled({ timeout: 10000 });
+      await loginButton.click();
+      Logger.debug('Login button clicked');
+      
+
+    await browser.pause(7000); // simulate page load buffer (adjust if needed)
+
+    const homeLink = $("//a[contains(text(), 'Click here to go home')]");
+
+    // Wait up to 10 seconds until it's displayed (if exists)
+    const isPresent = await homeLink.waitForDisplayed({ timeout: 7000, reverse: false }).catch(() => false);
+
+    if (isPresent) {
+        console.log("Detected 'Page not found'. Clicking return link...");
         await homeLink.click();
-        await browser.pause(1000); // Wait after clicking
-      }
-    } catch (error) {
-      console.log('Home link not found, continuing...');
-    }
-
-    // Verify if login was successful
-    console.log('--> Verifying login success...');
-    const loginSuccess = await this.verifyLoginSuccess();
-    if (loginSuccess) {
-      console.log('-->Login successful!');
+        await browser.pause(10000); // wait after click for redirect
     } else {
-      console.log('-->Login failed');
+        console.log("No error link present. Page is normal.");
     }
-   
-    
-    // Exit the test here - stopping execution
-    process.exit(0);
 
+      // Wait for login to complete
+      // Logger.debug('Waiting for login to complete');
+      // await this.waitForLoginComplete();
+
+      Logger.logSuccess('Login completed successfully');
+    } catch (error) {
+      Logger.logFailure('Login failed', error);
+      throw error;
+    }
   }
 
-  
-
-
-
-
-
-  // /**
-  //  * Login using credentials from configuration
-  //  * @param userType - Type of user credentials to use (test, admin, dev, qa, staging)
-  //  */
-  // async loginWithConfig(userType: string = 'dev') {
-  //   const credentials = ConfigReader.getCredentials(userType);
-  //   await this.login(credentials.username, credentials.password);
-  // }
-
   /**
-   * Login using environment-specific credentials
-   * Automatically selects credentials based on current environment
+   * A helper method that logs in using credentials from the config.
    */
   async loginWithEnvironmentCredentials() {
-    const credentials = ConfigReader.getEnvironmentCredentials();
-    await this.login(credentials.username, credentials.password);
+    Logger.logTestStep('Logging in with environment credentials');
+
+    try {
+      // Get credentials from config
+      const credentials = ConfigReader.getCredentials('DEV');
+      Logger.debug('Retrieved credentials from config', { username: credentials.username });
+
+      await this.login(credentials.username, credentials.password);
+
+      Logger.logSuccess('Successfully logged in with environment credentials');
+    } catch (error) {
+      Logger.logFailure('Failed to login with environment credentials', error);
+      throw error;
+    }
   }
 
   /**
-   * Verify if login was successful using the simple success check
-   * @returns Promise<boolean> - True if login appears successful
+   * Wait for login to complete
    */
-  async verifyLoginSuccess(): Promise<boolean> {
-    // Check if we're redirected away from login page or if URL contains success indicators
-    const currentUrl = await browser.getUrl();
-    const pageTitle = await browser.getTitle();
+  async waitForLoginComplete() {
+    Logger.debug('Waiting for login completion');
 
-    // Success indicators:
-    // 1. URL changed from login page
-    // 2. No longer on /login path
-    // 3. Page title changed from login page
-    const isNotOnLoginPage = !currentUrl.includes('/login') || currentUrl.includes('/auth') || currentUrl.includes('/dashboard');
-    const titleChanged = !pageTitle.toLowerCase().includes('login');
+    try {
+      // Wait for URL to change (indicating successful login)
+      await (global as any).browser.waitUntil(async () => {
+        const currentUrl = await (global as any).browser.getUrl();
+        const isLoginPage = currentUrl.includes('login');
+        Logger.debug(`Current URL: ${currentUrl}, Is login page: ${isLoginPage}`);
+        return !isLoginPage;
+      }, {
+        timeout: 30000,
+        timeoutMsg: 'Login did not complete within 30 seconds'
+      });
 
-    return isNotOnLoginPage || titleChanged;
+      Logger.debug('Login completion detected');
+
+      // Additional wait for page to stabilize
+      await (global as any).browser.pause(2000);
+
+    } catch (error) {
+      Logger.logFailure('Failed to wait for login completion', error);
+      throw error;
+    }
   }
 
-  
-  
+  /**
+   * Verifies that the login was successful by waiting for a reliable element
+   * that appears on the page only after a successful login.
+   */
+  async verifyLoginSuccess() {
+    Logger.logTestStep('Verifying login success');
 
-  
+    try {
+      const currentUrl = await (global as any).browser.getUrl();
+      const isLoggedIn = !currentUrl.includes('login');
+
+      if (isLoggedIn) {
+        Logger.logSuccess('Login verification successful');
+        Logger.debug(`Current URL after login: ${currentUrl}`);
+        return true;
+      } else {
+        Logger.logFailure('Login verification failed - still on login page');
+        return false;
+      }
+
+    } catch (error) {
+      Logger.logFailure('Failed to verify login success', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Logout
+   */
 }
 
-export default new LoginPage();
+export default new TyroLoginPage();

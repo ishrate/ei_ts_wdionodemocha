@@ -10,7 +10,7 @@ class ConfigReader {
    */
   getBaseUrl(): string {
     try {
-      return browser?.config?.baseUrl || process.env.BASE_URL || 'https://duckduckgo.com';
+      return (global as any).browser?.config?.baseUrl || process.env.BASE_URL || 'https://duckduckgo.com';
     } catch {
       return process.env.BASE_URL || 'https://duckduckgo.com';
     }
@@ -22,7 +22,7 @@ class ConfigReader {
    */
   getPageLoadTimeout(): number {
     try {
-      return browser?.config?.waitforTimeout || parseInt(process.env.PAGE_LOAD_TIMEOUT || '10000');
+      return (global as any).browser?.config?.waitforTimeout || parseInt(process.env.PAGE_LOAD_TIMEOUT || '10000');
     } catch {
       return parseInt(process.env.PAGE_LOAD_TIMEOUT || '10000');
     }
@@ -147,7 +147,7 @@ class ConfigReader {
    */
   getBrowserName(): string {
     try {
-      const capabilities = browser?.config?.capabilities;
+      const capabilities = (global as any).browser?.config?.capabilities;
       if (Array.isArray(capabilities) && capabilities.length > 0) {
         return capabilities[0].browserName || 'chrome';
       }
@@ -229,6 +229,95 @@ class ConfigReader {
       return false;
     }
   }
+
+  // ==================== DATABASE CONFIGURATION ====================
+
+  /**
+   * Get database configuration
+   * @param dbType - Type of database (oracle, mysql, postgres)
+   * @returns object - Database configuration object
+   */
+  getDatabaseConfig(dbType: string = 'oracle'): { username: string; password: string; connectString: string } {
+    const dbTypeUpper = dbType.toUpperCase();
+    
+    const username = process.env[`${dbTypeUpper}_DB_USERNAME`] || process.env.DB_USERNAME;
+    const password = process.env[`${dbTypeUpper}_DB_PASSWORD`] || process.env.DB_PASSWORD;
+    const connectString = process.env[`${dbTypeUpper}_DB_CONNECTION_STRING`] || process.env.DB_CONNECTION_STRING;
+    
+    if (!username || !password || !connectString) {
+      throw new Error(`Database configuration not found for ${dbType}. Please set ${dbTypeUpper}_DB_USERNAME, ${dbTypeUpper}_DB_PASSWORD, and ${dbTypeUpper}_DB_CONNECTION_STRING in .env file`);
+    }
+    
+    return {
+      username,
+      password,
+      connectString
+    };
+  }
+
+  /**
+   * Get Oracle database configuration
+   * @returns object - Oracle database configuration
+   */
+  getOracleDatabaseConfig(): { username: string; password: string; connectString: string } {
+    return this.getDatabaseConfig('oracle');
+  }
+
+  /**
+   * Get database pool configuration
+   * @param dbType - Type of database (oracle, mysql, postgres)
+   * @returns object - Database pool configuration
+   */
+  getDatabasePoolConfig(dbType: string = 'oracle'): any {
+    const dbConfig = this.getDatabaseConfig(dbType);
+    const dbTypeUpper = dbType.toUpperCase();
+    
+    return {
+      ...dbConfig,
+      poolMin: parseInt(process.env[`${dbTypeUpper}_DB_POOL_MIN`] || process.env.DB_POOL_MIN || '1'),
+      poolMax: parseInt(process.env[`${dbTypeUpper}_DB_POOL_MAX`] || process.env.DB_POOL_MAX || '10'),
+      poolIncrement: parseInt(process.env[`${dbTypeUpper}_DB_POOL_INCREMENT`] || process.env.DB_POOL_INCREMENT || '1'),
+      poolTimeout: parseInt(process.env[`${dbTypeUpper}_DB_POOL_TIMEOUT`] || process.env.DB_POOL_TIMEOUT || '60')
+    };
+  }
+
+  /**
+   * Get environment-specific database configuration
+   * @returns object - Database configuration for current environment
+   */
+  getEnvironmentDatabaseConfig(): { username: string; password: string; connectString: string } {
+    const env = this.getCurrentEnvironment();
+    const envUpper = env.toUpperCase();
+    
+    const username = process.env[`${envUpper}_DB_USERNAME`] || process.env.DB_USERNAME;
+    const password = process.env[`${envUpper}_DB_PASSWORD`] || process.env.DB_PASSWORD;
+    const connectString = process.env[`${envUpper}_DB_CONNECTION_STRING`] || process.env.DB_CONNECTION_STRING;
+    
+    if (!username || !password || !connectString) {
+      throw new Error(`Database configuration not found for environment: ${env}. Please set ${envUpper}_DB_USERNAME, ${envUpper}_DB_PASSWORD, and ${envUpper}_DB_CONNECTION_STRING in .env file`);
+    }
+    
+    return {
+      username,
+      password,
+      connectString
+    };
+  }
+
+  /**
+   * Validate database configuration
+   * @param dbType - Type of database to validate
+   * @returns boolean - True if configuration is valid
+   */
+  validateDatabaseConfig(dbType: string = 'oracle'): boolean {
+    try {
+      this.getDatabaseConfig(dbType);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
 }
 
 export default new ConfigReader();

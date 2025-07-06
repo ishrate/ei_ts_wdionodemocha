@@ -3,6 +3,8 @@
  * Equivalent to Java Selenium BaseTest class with setup/teardown and common test utilities
  */
 import ConfigReader from '../utils/configReader';
+import * as fs from 'fs';
+import * as path from 'path';
 
 class BaseTest {
   
@@ -20,11 +22,11 @@ class BaseTest {
     
     // Maximize browser if configured
     if (ConfigReader.shouldMaximizeBrowser()) {
-      await browser.maximizeWindow();
+      await (global as any).browser.maximizeWindow();
     }
     
     // Set timeouts
-    await browser.setTimeout({
+    await (global as any).browser.setTimeout({
       'pageLoad': ConfigReader.getPageLoadTimeout(),
       'implicit': ConfigReader.getElementWaitTimeout()
     });
@@ -36,6 +38,7 @@ class BaseTest {
    */
   static async afterEach() {
     // Do nothing - keeping browser session alive
+    // await browser.deleteSession(); // Removed because deleteSession does not exist on type 'Browser'
     console.log('-->Keeping browser session open...');
   }
 
@@ -80,7 +83,7 @@ class BaseTest {
     const filename = `${status}_${testName}_${timestamp}.png`;
     
     try {
-      await browser.saveScreenshot(`./test-output/screenshots/${filename}`);
+      await (global as any).browser.saveScreenshot(`./test-output/screenshots/${filename}`);
       console.log(`--> Screenshot saved: test-output/screenshots/${filename}`);
     } catch (error) {
       console.log(`-->Failed to take screenshot: ${error}`);
@@ -92,7 +95,7 @@ class BaseTest {
    */
   static async dismissAnyAlerts() {
     try {
-      await browser.acceptAlert();
+      await (global as any).browser.acceptAlert();
     } catch {
       // No alert present, continue
     }
@@ -102,11 +105,10 @@ class BaseTest {
    * Create screenshots directory
    */
   static async createScreenshotsDirectory() {
-    const fs = require('fs');
-    const path = './test-output/screenshots';
+    const screenshotPath = path.join(process.cwd(), 'test-output', 'screenshots');
     
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync(path, { recursive: true });
+    if (!fs.existsSync(screenshotPath)) {
+      fs.mkdirSync(screenshotPath, { recursive: true });
       console.log('-->Created screenshots directory: test-output/screenshots');
     }
   }
@@ -115,10 +117,10 @@ class BaseTest {
    * Wait for page to load completely
    */
   static async waitForPageLoad() {
-    await browser.waitUntil(
+    await (global as any).browser.waitUntil(
       async () => {
-        const readyState = await browser.execute(() => {
-          return (globalThis as any).document.readyState;
+        const readyState = await (global as any).browser.execute(() => {
+          return document.readyState;
         });
         return readyState === 'complete';
       },
