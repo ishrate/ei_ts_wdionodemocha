@@ -1,5 +1,7 @@
 import * as dotenv from 'dotenv';
 
+/// <reference types="webdriverio/sync" />
+
 // Load environment variables
 dotenv.config();
 
@@ -9,7 +11,7 @@ export const config = {
     
     // Test Files
     specs: [
-          './test/specs/tyroInvoiceSubmit.spec.ts'
+          './test/specs/simple.spec.ts'
     ],
     
     // Capabilities
@@ -19,30 +21,13 @@ export const config = {
         acceptInsecureCerts: true,
         'goog:chromeOptions': {
             args: [
-                '--disable-infobars', 
-                '--disable-dev-shm-usage', 
+                ...(process.env.HEADLESS === 'true' ? ['--headless=new'] : []),
                 '--no-sandbox',
-                '--disable-blink-features=AutomationControlled',
-                '--disable-extensions',
-                '--no-first-run',
-                '--disable-default-apps',
-                '--disable-popup-blocking',
-                '--disable-notifications',
-                '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            ],
-            excludeSwitches: ['enable-automation'],
-            useAutomationExtension: false,
-            prefs: {
-                // Disable save password popup
-                'credentials_enable_service': false,
-                'profile.password_manager_enabled': false,
-                // Disable other popups
-                'profile.default_content_setting_values.notifications': 2,
-                'profile.default_content_setting_values.media_stream_mic': 2,
-                'profile.default_content_setting_values.media_stream_camera': 2,
-                'profile.default_content_setting_values.geolocation': 2,
-                'profile.default_content_setting_values.cookies': 1
-            }
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--ignore-certificate-errors',
+                '--ignore-ssl-errors'
+            ]
         }
     }],
     
@@ -65,14 +50,14 @@ export const config = {
     reporters: [
         'spec',
         ['allure', {
-            outputDir: './allure-results',
+            outputDir: './test-output/allure-results',
             disableWebdriverStepsReporting: true,
             disableWebdriverScreenshotsReporting: false
         }]
     ] as Array<string | [string, Record<string, any>]>,
     
-    // Services
-    services: [],
+    // Services - Using chromedriver service for WDIO v8
+    services: ['chromedriver'],
     
     // Custom Application URLs and Settings
     appConfig: {
@@ -100,17 +85,19 @@ export const config = {
         // Make config available globally
         (global as any).appConfig = config.appConfig;
     },
-    
-    // MODIFIED: Keep browser open regardless of test result
+
+    // Simplified afterTest hook
     afterTest: async function (test: any, context: any, { error, result, duration, passed, retries }: { error: any; result: any; duration: any; passed: any; retries: any }) {
         if (passed) {
-            console.log('Test PASSED. Browser will remain open for inspection (5 minutes)...');
+            console.log('✅ Test PASSED!');
         } else {
-            console.log('Test FAILED. Browser will remain open for debugging (5 minutes)...');
+            console.log('❌ Test FAILED!');
+            // Take screenshot on failure
+            try {
+                //await browser.saveScreenshot('./test-output/screenshots/failure.png');
+            } catch (e) {
+                console.log('Could not save screenshot:', e);
+            }
         }
-        
-        // Keep browser open for 10 minutes regardless of test result
-        console.log('Browser will stay open for 5 minutes. Press Ctrl+C to stop earlier.');
-        await browser.pause(300000); // 5 minutes = 300,000 milliseconds
     }
 };
