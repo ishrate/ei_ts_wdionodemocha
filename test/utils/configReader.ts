@@ -1,3 +1,5 @@
+import { decryptSecret } from './decryptUtil';
+
 /**
  * ConfigReader - Utility class for reading configuration values
  * Similar to Java property readers for configuration management
@@ -185,12 +187,10 @@ class ConfigReader {
     const userTypeUpper = userType.toUpperCase();
     const envKey = `${userTypeUpper}_PASSWORD`;
     const password = process.env[envKey];
-    
     if (!password) {
       throw new Error(`Password not found for user type: ${userType}. Please set ${envKey} in .env file`);
     }
-    
-    return password;
+    return this.maybeDecrypt(password);
   }
 
   /**
@@ -239,18 +239,15 @@ class ConfigReader {
    */
   getDatabaseConfig(dbType: string = 'oracle'): { username: string; password: string; connectString: string } {
     const dbTypeUpper = dbType.toUpperCase();
-    
     const username = process.env[`${dbTypeUpper}_DB_USERNAME`] || process.env.DB_USERNAME;
     const password = process.env[`${dbTypeUpper}_DB_PASSWORD`] || process.env.DB_PASSWORD;
     const connectString = process.env[`${dbTypeUpper}_DB_CONNECTION_STRING`] || process.env.DB_CONNECTION_STRING;
-    
     if (!username || !password || !connectString) {
       throw new Error(`Database configuration not found for ${dbType}. Please set ${dbTypeUpper}_DB_USERNAME, ${dbTypeUpper}_DB_PASSWORD, and ${dbTypeUpper}_DB_CONNECTION_STRING in .env file`);
     }
-    
     return {
       username,
-      password,
+      password: this.maybeDecrypt(password),
       connectString
     };
   }
@@ -288,18 +285,15 @@ class ConfigReader {
   getEnvironmentDatabaseConfig(): { username: string; password: string; connectString: string } {
     const env = this.getCurrentEnvironment();
     const envUpper = env.toUpperCase();
-    
     const username = process.env[`${envUpper}_DB_USERNAME`] || process.env.DB_USERNAME;
     const password = process.env[`${envUpper}_DB_PASSWORD`] || process.env.DB_PASSWORD;
     const connectString = process.env[`${envUpper}_DB_CONNECTION_STRING`] || process.env.DB_CONNECTION_STRING;
-    
     if (!username || !password || !connectString) {
       throw new Error(`Database configuration not found for environment: ${env}. Please set ${envUpper}_DB_USERNAME, ${envUpper}_DB_PASSWORD, and ${envUpper}_DB_CONNECTION_STRING in .env file`);
     }
-    
     return {
       username,
-      password,
+      password: this.maybeDecrypt(password),
       connectString
     };
   }
@@ -318,6 +312,18 @@ class ConfigReader {
     }
   }
 
+  private maybeDecrypt(value: string): string {
+    const secret = process.env.DECRYPT_SECRET;
+    if (secret && value && value.includes(':')) {
+      // Assume value is encrypted if it contains a colon (iv:encrypted)
+      try {
+        return decryptSecret(value, secret);
+      } catch (e) {
+        throw new Error('Failed to decrypt secret: ' + e);
+      }
+    }
+    return value;
+  }
 }
 
 export default new ConfigReader();

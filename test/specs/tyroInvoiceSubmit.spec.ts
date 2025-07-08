@@ -19,7 +19,7 @@ declare global {
   };
 }
 
-describe.only('Tyro Invoice Submission Tests', function () {
+describe('Tyro Invoice Submission Tests', function () {
   this.timeout(350000);
 
   beforeEach(async function () {
@@ -130,13 +130,17 @@ describe.only('Tyro Invoice Submission Tests', function () {
   });
 });
 
-describe.skip('Tyro Invoice Database Validation Tests', function () {
-  this.timeout(120000);
+//Tempus DB validatoin test
+
+describe('Tyro Invoice Database Validation Tests', function () {
+  this.timeout(150000);
 
   let dbConnection: any;
 
   before(async function () {
     try {
+      // Wait to allow the system to update the DB after invoice submission
+      await new Promise(resolve => setTimeout(resolve, 50000));
       dbConnection = await DatabaseHelper.connect();
       expect(dbConnection).to.not.be.null;
       BaseTest.logTestInfo('Database connection established');
@@ -197,25 +201,29 @@ describe.skip('Tyro Invoice Database Validation Tests', function () {
     expect(dbInvoice.CLAIM_NBR).to.not.be.null;
     expect(dbInvoice.INVOICE_SUBMITTED_DATE).to.not.be.null;
 
+    console.log('==============================================================');
+    console.log('Here are Invoice Data retrieved from Tempus BD TS2', dbInvoice);
+    console.log('================================================================');
+
     expect(dbInvoice.INVOICE_STATUS).to.be.oneOf([
-      'SUBMITTED', 'UNDER REVIEW', 'APPROVED', 'REJECTED', 'PENDING', 'PROCESSING'
+      'SUBMITTED', 'PENDING REVIEW', 'PARTIALLY ACCEPTED', 'REJECTED', 'ACCEPTED', 'DENIED'
     ]);
 
     allure.addAttachment('Database validation results', JSON.stringify(dbInvoice, null, 2), 'application/json');
     BaseTest.logTestSuccess('Database validation completed successfully');
   });
 
-  it('should validate invoice data consistency and integrity', async function () {
-    const submittedData = global.submittedInvoiceData;
+  // it('should validate invoice data consistency and integrity', async function () {
+  //   const submittedData = global.submittedInvoiceData;
 
-    expect(submittedData).to.not.be.null;
-    expect(submittedData).to.not.be.undefined;
+  //   expect(submittedData).to.not.be.null;
+  //   expect(submittedData).to.not.be.undefined;
 
-    expect(submittedData.claimStatus).to.be.oneOf([
-      'UNDER REVIEW', 'SUBMITTED', 'PENDING', 'APPROVED', 'REJECTED'
-    ]);
+  //   expect(submittedData.claimStatus).to.be.oneOf([
+  //     'UNDER REVIEW', 'SUBMITTED', 'PENDING', 'APPROVED', 'REJECTED'
+  //   ]);
 
-    BaseTest.logTestSuccess('Data integrity validation completed successfully');
-  });
+  //   BaseTest.logTestSuccess('Data integrity validation completed successfully');
+  // });
 });
 

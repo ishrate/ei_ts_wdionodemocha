@@ -102,6 +102,73 @@ PAGE_LOAD_TIMEOUT=10000
 ELEMENT_WAIT_TIMEOUT=5000
 ```
 
+## 🔒 Using Encrypted Passwords in .env
+
+To keep your credentials secure, this project supports encrypted passwords for application and database logins. You can use either plain text or encrypted values in your `.env` file.
+
+### How to Encrypt and Use Passwords
+
+1. **Choose a Secret Key**
+   - Example: `Qw7!pL9z$2rT8vB6@xF3eS1mN0yU5hJ4` (generate your own and keep it safe!)
+
+2. **Encrypt Your Password**
+   - In your project root, run:
+     ```powershell
+     node encrypt-secret.js "YourPasswordHere" "YourSecretKeyHere"
+     ```
+   - Copy the output string (format: `iv:encrypted`).
+
+3. **Update `.env`**
+   - Replace the plain password with the encrypted string (no quotes):
+     ```properties
+     DEV_PASSWORD=ENCRYPTED_STRING_HERE
+     TEST_PASSWORD=ENCRYPTED_STRING_HERE
+     DB_PASSWORD=ENCRYPTED_STRING_HERE
+     ```
+
+4. **Set the Secret Key as an Environment Variable**
+   - **PowerShell (temporary for session):**
+     ```powershell
+     $env:DECRYPT_SECRET="YourSecretKeyHere"
+     ```
+   - **Permanent (Windows):**
+     - Open "Edit environment variables for your account"
+     - Add a new user variable: `DECRYPT_SECRET=YourSecretKeyHere`
+     - Restart your terminal/VS Code
+
+5. **Run your tests/app as usual.**
+   - The framework will automatically decrypt passwords at runtime if needed.
+   - Plain text values are still supported for gradual migration.
+
+---
+
+## 📊 Allure Report Generation & Viewing
+
+This project provides a PowerShell script to automate Allure report generation, archiving, and viewing.
+
+### How to Use
+
+1. **Run your tests to generate Allure results.**
+2. **Generate and view the report:**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\generate-allure-report.ps1
+   ```
+   - This will:
+     - Generate a fresh Allure HTML report from `test-output/allure-results`
+     - Archive the report in a timestamped folder under `test-output/allure-reports/`
+     - Open the report in your browser using Allure's built-in server
+
+3. **View archived reports:**
+   - Open any folder under `test-output/allure-reports/` and run:
+     ```powershell
+     npx allure open .
+     ```
+   - Or use the script again to view the latest report.
+
+---
+
+**For more details, see the troubleshooting guide and comments in the relevant scripts.**
+
 ## 🐳 Docker Integration
 
 The `.dockerignore` file excludes:
@@ -129,7 +196,7 @@ This framework follows Java Selenium patterns:
 | Test Classes | `test/specs/*.spec.ts` |
 | Properties files | `.env` + `resources/config/` |
 | TestNG XML | XML files in `resources/data/` |
-| Maven target/ | `test-output/` |
+| Maven target/| `test-output/` |
 
 ## 📈 Reporting
 
