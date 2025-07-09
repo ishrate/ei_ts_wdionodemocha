@@ -211,3 +211,66 @@ The folder structure is optimized for:
 - **Git**: Only source code and resources are tracked
 - **Docker**: Excludes generated files and dependencies
 - **CI/CD**: Clean separation of source and output
+
+---
+
+## 🔐 Secure Credential Management (Cross-Platform)
+
+This project supports encrypted secrets for all sensitive credentials (DB/app passwords) in `.env`.
+
+### How to Encrypt and Use Passwords
+
+1. **Choose a Secret Key**
+   - Example: `Qw7!pL9z$2rT8vB6@xF3eS1mN0yU5hJ4` (generate your own and keep it safe!)
+
+2. **Encrypt Your Password**
+   - In your project root, run:
+     ```powershell
+     node encrypt-secret.js "YourPasswordHere" "YourSecretKeyHere"
+     ```
+   - Copy the output string (format: `iv:encrypted`).
+
+3. **Update `.env`**
+   - Replace the plain password with the encrypted string (no quotes):
+     ```properties
+     DEV_PASSWORD=ENCRYPTED_STRING_HERE
+     TEST_PASSWORD=ENCRYPTED_STRING_HERE
+     DB_PASSWORD=ENCRYPTED_STRING_HERE
+     ```
+
+4. **Set the Secret Key for Decryption (Choose one method):**
+   - **PowerShell (Windows):**
+     ```powershell
+     .\set-decrypt-secret.ps1 "YourSecretKeyHere"
+     # or manually:
+     $env:DECRYPT_SECRET = "YourSecretKeyHere"
+     ```
+   - **Bash/sh (Linux/macOS/Git Bash):**
+     ```sh
+     source ./set-decrypt-secret.sh "YourSecretKeyHere"
+     # or manually:
+     export DECRYPT_SECRET="YourSecretKeyHere"
+     ```
+   - **NPM Script (cross-platform, for CI or local):**
+     - Set `DECRYPT_SECRET_NPM` in your environment, or pass as an argument:
+       ```powershell
+       $env:DECRYPT_SECRET_NPM = "YourSecretKeyHere"
+       npm run test:with-secret
+       # or
+       npm run test:with-secret -- "YourSecretKeyHere"
+       ```
+
+5. **Run your tests/app as usual.**
+   - The framework will automatically decrypt passwords at runtime if needed.
+   - Plain text values are still supported for gradual migration.
+
+#### NPM Scripts for Encrypted Secrets
+- `npm run test:with-secret` — Run all tests with secret from env or argument
+- `npm run test:with-secret:spec -- "YourSecretKeyHere"` — Run specific spec with secret
+
+#### Troubleshooting
+- If you see an error about missing or incorrect `DECRYPT_SECRET`, ensure you set the secret in the same terminal/session before running tests.
+- For CI/CD, set `DECRYPT_SECRET_NPM` as a secret variable in your pipeline.
+- See error messages for detailed instructions.
+
+---

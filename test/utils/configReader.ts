@@ -314,12 +314,22 @@ class ConfigReader {
 
   private maybeDecrypt(value: string): string {
     const secret = process.env.DECRYPT_SECRET;
-    if (secret && value && value.includes(':')) {
-      // Assume value is encrypted if it contains a colon (iv:encrypted)
+    if (value && value.includes(':')) {
+      if (!secret) {
+        throw new Error(
+          'Encrypted secret detected, but DECRYPT_SECRET is not set.\n' +
+          'Please set the DECRYPT_SECRET environment variable to decrypt sensitive values.\n' +
+          'You can do this by running the pre-run script or setting it in your terminal before running tests.'
+        );
+      }
       try {
         return decryptSecret(value, secret);
       } catch (e) {
-        throw new Error('Failed to decrypt secret: ' + e);
+        throw new Error(
+          'Failed to decrypt secret. This usually means your DECRYPT_SECRET is missing or incorrect.\n' +
+          'Check that you are using the same secret used for encryption, and that there are no extra spaces or typos.\n' +
+          'Original error: ' + e
+        );
       }
     }
     return value;

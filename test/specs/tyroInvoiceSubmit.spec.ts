@@ -197,7 +197,11 @@ describe('Tyro Invoice Database Validation Tests', function () {
 
     expect(dbInvoice).to.not.be.null;
     expect(dbInvoice.INVOICE_PAYEE_TYPE).to.not.be.null;
-    expect(dbInvoice.INVOICE_STATUS).to.not.be.null;
+    // Defensive debug: print full DB row if status is missing
+    if (!('INVOICE_STATUS' in dbInvoice)) {
+      console.error('INVOICE_STATUS missing from DB row:', JSON.stringify(dbInvoice, null, 2));
+    }
+    expect(dbInvoice.INVOICE_STATUS, 'INVOICE_STATUS is missing from DB result! Full row: ' + JSON.stringify(dbInvoice)).to.exist;
     expect(dbInvoice.CLAIM_NBR).to.not.be.null;
     expect(dbInvoice.INVOICE_SUBMITTED_DATE).to.not.be.null;
 
@@ -205,8 +209,12 @@ describe('Tyro Invoice Database Validation Tests', function () {
     console.log('Here are Invoice Data retrieved from Tempus BD TS2', dbInvoice);
     console.log('================================================================');
 
+    // Safe, case-sensitive status check (matches DB value exactly)
+    if (dbInvoice.INVOICE_STATUS === undefined) {
+      throw new Error('INVOICE_STATUS is undefined in DB result! Full row: ' + JSON.stringify(dbInvoice));
+    }
     expect(dbInvoice.INVOICE_STATUS).to.be.oneOf([
-      'SUBMITTED', 'PENDING REVIEW', 'PARTIALLY ACCEPTED', 'REJECTED', 'ACCEPTED', 'DENIED'
+      'Submitted', 'Pending Review', 'Partially Accepted', 'Rejected', 'Accepted', 'Denied'
     ]);
 
     allure.addAttachment('Database validation results', JSON.stringify(dbInvoice, null, 2), 'application/json');

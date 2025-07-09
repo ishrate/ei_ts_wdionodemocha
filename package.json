@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "wdio run wdio.conf.ts",
+    "test:with-secret": "node ./set-decrypt-secret-npm.js && wdio run wdio.conf.ts",
+    "test:with-secret:spec": "node ./set-decrypt-secret-npm.js && wdio run wdio.conf.ts --spec=./test/specs/tyroInvoiceSubmit.spec.ts",
     "test:debug": "npx --node-arg=--inspect-brk wdio run wdio.conf.ts",
     "test:debug:tyro": "npx --node-arg=--inspect-brk wdio run wdio.conf.ts --spec=./test/specs/tyroInvoiceSubmit.spec.ts",
     "test:headless": "HEADLESS=true wdio run wdio.conf.ts",

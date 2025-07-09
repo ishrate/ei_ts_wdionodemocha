@@ -1,4 +1,6 @@
-import oracledb from 'oracledb';
+import * as oracledb from 'oracledb';
+// Enable Oracle Thick mode for legacy DB support
+oracledb.initOracleClient({ libDir: 'C:\\Oraclenodejs\\instantclient_21_18' }); 
 import ConfigReader from './configReader';
 
 export default class DatabaseHelper {
@@ -57,7 +59,8 @@ export default class DatabaseHelper {
 
   static async executeQuery(connection: any, query: string, params: any = {}) {
     try {
-      const result = await connection.execute(query, params);
+      // Always return rows as objects with column names
+      const result = await connection.execute(query, params, { outFormat: require('oracledb').OUT_FORMAT_OBJECT });
       return result.rows;
     } catch (error) {
       console.error('Database query failed:', error);
