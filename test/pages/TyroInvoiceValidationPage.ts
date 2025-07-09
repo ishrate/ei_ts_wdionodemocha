@@ -9,7 +9,7 @@ export class TyroInvoiceValidationPage {
    */
   async getInvoiceValidationValues(): Promise<{ claimStatus: string; gatewayReference: string; tyroReference: string }> {
     await (global as any).browser.pause(30000);
-    console.log('------>STARTED getInvoiceValidationValues');
+    Logger.info('------>STARTED getInvoiceValidationValues');
     Logger.logTestStep('Getting invoice validation values from page');
     try {
       await this.pageObject.claimStatus.waitForDisplayed({ timeout: 15000 });
@@ -27,11 +27,11 @@ export class TyroInvoiceValidationPage {
         tyroReference: tyroReference.trim()
       };
 
-      console.log('------>>>>SUCCESSS<<<<--------');
 
-      console.log('Validation Results:', claimStatus);
-      console.log('Gateway Reference:', gatewayReference);
-      console.log('Tyro Reference:', tyroReference);
+      Logger.info('------>>>>SUCCESSS<<<<--------');
+      Logger.info(`Validation Results: ${claimStatus}`);
+      Logger.info(`Gateway Reference: ${gatewayReference}`);
+      Logger.info(`Tyro Reference: ${tyroReference}`);
 
 
       Logger.logTestData('Invoice Validation Results', validationResults);

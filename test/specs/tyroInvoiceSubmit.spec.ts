@@ -7,6 +7,7 @@ import { TyroInvoiceValidationPage } from '../pages/TyroInvoiceValidationPage';
 import ConfigReader from '../utils/configReader';
 import BaseTest from '../utils/BaseTest';
 import xmlDataReader from '../utils/xmlDataReader';
+import Logger from '../utils/Logger';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -32,7 +33,7 @@ describe('Tyro Invoice Submission Tests', function () {
         const screenshot = await (browser as any).takeScreenshot();
         allure.addAttachment('Screenshot', Buffer.from(screenshot, 'base64'), 'image/png');
       } catch (error) {
-        console.log('Failed to capture screenshot:', error instanceof Error ? error.message : String(error));
+        Logger.error('Failed to capture screenshot:', error instanceof Error ? error.message : String(error));
       }
     }
     await BaseTest.afterEach();
@@ -145,7 +146,7 @@ describe('Tyro Invoice Database Validation Tests', function () {
       expect(dbConnection).to.not.be.null;
       BaseTest.logTestInfo('Database connection established');
     } catch (error) {
-      console.error('Database connection error:', error);
+      Logger.error('Database connection error:', error);
       throw error;
     }
   });
@@ -189,7 +190,7 @@ describe('Tyro Invoice Database Validation Tests', function () {
       expect(dbResults.length).to.equal(1);
 
     } catch (error) {
-      console.error('Database query error:', error);
+      Logger.error('Database query error:', error);
       throw error;
     }
 
@@ -199,15 +200,15 @@ describe('Tyro Invoice Database Validation Tests', function () {
     expect(dbInvoice.INVOICE_PAYEE_TYPE).to.not.be.null;
     // Defensive debug: print full DB row if status is missing
     if (!('INVOICE_STATUS' in dbInvoice)) {
-      console.error('INVOICE_STATUS missing from DB row:', JSON.stringify(dbInvoice, null, 2));
+      Logger.error('INVOICE_STATUS missing from DB row: ' + JSON.stringify(dbInvoice, null, 2));
     }
     expect(dbInvoice.INVOICE_STATUS, 'INVOICE_STATUS is missing from DB result! Full row: ' + JSON.stringify(dbInvoice)).to.exist;
     expect(dbInvoice.CLAIM_NBR).to.not.be.null;
     expect(dbInvoice.INVOICE_SUBMITTED_DATE).to.not.be.null;
 
-    console.log('==============================================================');
-    console.log('Here are Invoice Data retrieved from Tempus BD TS2', dbInvoice);
-    console.log('================================================================');
+    Logger.info('==============================================================');
+    Logger.info('Here are Invoice Data retrieved from Tempus BD TS2: ' + JSON.stringify(dbInvoice, null, 2));
+    Logger.info('================================================================');
 
     // Safe, case-sensitive status check (matches DB value exactly)
     if (dbInvoice.INVOICE_STATUS === undefined) {

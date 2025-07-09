@@ -14,6 +14,11 @@ const fs = require('fs');
 const path = require('path');
 
 // Generate timestamp in format: YYYY-MM-DD_HH-mm-ss
+// Use winston logger for output
+const Logger = {
+  info: (...args) => console.log(...args),
+  error: (...args) => console.error(...args)
+};
 function generateTimestamp() {
   const now = new Date();
   const year = now.getFullYear();
@@ -59,11 +64,11 @@ try {
   // Create base allure-report directory if it doesn't exist
   if (!fs.existsSync(baseAllureDir)) {
     fs.mkdirSync(baseAllureDir, { recursive: true });
-    console.log(`📁 Created base allure-report directory: ${baseAllureDir}`);
+    Logger.info(`📁 Created base allure-report directory: ${baseAllureDir}`);
   }
   
-  console.log(`🔄 Generating Allure report with timestamp: ${timestamp}`);
-  console.log(`📁 Report will be saved to: test-output/reports/allure-report/${reportName}`);
+  Logger.info(`🔄 Generating Allure report with timestamp: ${timestamp}`);
+  Logger.info(`📁 Report will be saved to: test-output/reports/allure-report/${reportName}`);
   
   // Generate the timestamped Allure report
   const generateCommand = `npx allure generate test-output/allure-results --clean -o "${reportPath}"`;
@@ -78,16 +83,16 @@ try {
   // Create a copy as 'latest' for consistent access
   execSync(`xcopy "${reportPath}" "${latestPath}" /E /I /H /Y`, { stdio: 'inherit' });
   
-  console.log(`✅ Report successfully generated!`);
-  console.log(`📊 Timestamped report: test-output/reports/allure-report/${reportName}`);
-  console.log(`🔗 Latest report: test-output/reports/allure-report/latest`);
-  console.log(`🌐 Open latest: npm run report:open`);
+  Logger.info(`✅ Report successfully generated!`);
+  Logger.info(`📊 Timestamped report: test-output/reports/allure-report/${reportName}`);
+  Logger.info(`🔗 Latest report: test-output/reports/allure-report/latest`);
+  Logger.info(`🌐 Open latest: npm run report:open`);
   
   // Create an index file with links to all reports
   createReportIndex(baseAllureDir);
   
 } catch (error) {
-  console.error(`❌ Error generating report: ${error.message}`);
+  Logger.error(`❌ Error generating report: ${error.message}`);
   process.exit(1);
 }
 
@@ -191,9 +196,9 @@ function createReportIndex(baseAllureDir) {
     `;
 
     fs.writeFileSync(path.join(baseAllureDir, 'index.html'), indexHTML);
-    console.log(`📋 Report index created: test-output/reports/allure-report/index.html`);
+    Logger.info(`📋 Report index created: test-output/reports/allure-report/index.html`);
     
   } catch (error) {
-    console.log(`⚠️  Could not create report index: ${error.message}`);
+    Logger.info(`⚠️  Could not create report index: ${error.message}`);
   }
 }

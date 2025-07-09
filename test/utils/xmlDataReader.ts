@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseString } from 'xml2js';
+import Logger from '../utils/Logger';
 
 /**
  * XmlDataReader - Utility class for reading test data from XML files
@@ -15,8 +16,7 @@ class XmlDataReader {
    */
   async readSearchData(fileName: string = 'searchData.xml'): Promise<any> {
     const filePath = path.join(__dirname, '../data', fileName);
-    
-    console.log('Reading XML from:', filePath);
+    Logger.info(`Reading XML from: ${filePath}`);
     
     try {
       const xmlContent = fs.readFileSync(filePath, 'utf8');
@@ -158,7 +158,7 @@ class XmlDataReader {
   async getSectionData(fileName: string, section: string): Promise<Record<string, string>> {
     // Adjust the path if your data folder is different
     const filePath = path.join(__dirname, '../data', fileName);
-    console.log('Reading XML from:', filePath);
+    Logger.info(`Reading XML from: ${filePath}`);
 
     try {
       const xmlContent = fs.readFileSync(filePath, 'utf8');
@@ -187,7 +187,7 @@ class XmlDataReader {
         });
       });
     } catch (error) {
-      console.error('Error reading XML file:', error);
+      Logger.error(`Error reading XML file: ${error}`);
       throw new Error(`Failed to read XML file ${fileName}: ${error}`);
     }
   }

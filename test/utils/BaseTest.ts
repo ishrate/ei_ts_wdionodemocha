@@ -5,6 +5,7 @@
 import ConfigReader from '../utils/configReader';
 import * as fs from 'fs';
 import * as path from 'path';
+import Logger from '../utils/Logger';
 
 class BaseTest {
   
@@ -15,10 +16,10 @@ class BaseTest {
    * Equivalent to @BeforeMethod in TestNG or @Before in JUnit
    */
   static async beforeEach() {
-    console.log(`-->Starting test: ${this.getCurrentTestName()}`);
-    console.log(`-->Environment: ${ConfigReader.getCurrentEnvironment()}`);
-    console.log(`-->Base URL: ${ConfigReader.getBaseUrl()}`);
-    console.log(`-->Browser: ${ConfigReader.getBrowserName()}`);
+    Logger.info(`-->Starting test: ${this.getCurrentTestName()}`);
+    Logger.info(`-->Environment: ${ConfigReader.getCurrentEnvironment()}`);
+    Logger.info(`-->Base URL: ${ConfigReader.getBaseUrl()}`);
+    Logger.info(`-->Browser: ${ConfigReader.getBrowserName()}`);
     
     // Maximize browser if configured
     if (ConfigReader.shouldMaximizeBrowser()) {
@@ -39,7 +40,7 @@ class BaseTest {
   static async afterEach() {
     // Do nothing - keeping browser session alive
     // await browser.deleteSession(); // Removed because deleteSession does not exist on type 'Browser'
-    console.log('-->Keeping browser session open...');
+    Logger.info('-->Keeping browser session open...');
   }
 
   /**
@@ -47,8 +48,8 @@ class BaseTest {
    * Equivalent to @BeforeClass in TestNG or @BeforeAll in JUnit
    */
   static async beforeAll() {
-    console.log('-->Starting test suite execution');
-    console.log(`-->Configuration loaded from: ${ConfigReader.getCurrentEnvironment()}`);
+    Logger.info('-->Starting test suite execution');
+    Logger.info(`-->Configuration loaded from: ${ConfigReader.getCurrentEnvironment()}`);
     
     // Create screenshots directory if it doesn't exist
     await this.createScreenshotsDirectory();
@@ -59,7 +60,7 @@ class BaseTest {
    * Equivalent to @AfterClass in TestNG or @AfterAll in JUnit
    */
   static async afterAll() {
-    console.log('-->Test suite execution completed');
+    Logger.info('-->Test suite execution completed');
   }
 
   // ==================== UTILITY METHODS ====================
@@ -84,9 +85,9 @@ class BaseTest {
     
     try {
       await (global as any).browser.saveScreenshot(`./test-output/screenshots/${filename}`);
-      console.log(`--> Screenshot saved: test-output/screenshots/${filename}`);
+      Logger.info(`--> Screenshot saved: test-output/screenshots/${filename}`);
     } catch (error) {
-      console.log(`-->Failed to take screenshot: ${error}`);
+      Logger.error(`-->Failed to take screenshot: ${error}`);
     }
   }
 
@@ -109,7 +110,7 @@ class BaseTest {
     
     if (!fs.existsSync(screenshotPath)) {
       fs.mkdirSync(screenshotPath, { recursive: true });
-      console.log('-->Created screenshots directory: test-output/screenshots');
+      Logger.info('-->Created screenshots directory: test-output/screenshots');
     }
   }
 
@@ -136,7 +137,7 @@ class BaseTest {
    * @param message - Message to print
    */
   static logTestInfo(message: string) {
-    console.log(`--> [${new Date().toLocaleTimeString()}] ${message}`);
+    Logger.info(`--> [${new Date().toLocaleTimeString()}] ${message}`);
   }
 
   /**
@@ -144,7 +145,7 @@ class BaseTest {
    * @param message - Error message to print
    */
   static logTestError(message: string) {
-    console.error(`--> [${new Date().toLocaleTimeString()}] ${message}`);
+    Logger.error(`--> [${new Date().toLocaleTimeString()}] ${message}`);
   }
 
   /**
@@ -152,7 +153,7 @@ class BaseTest {
    * @param message - Success message to print
    */
   static logTestSuccess(message: string) {
-    console.log(`-->[${new Date().toLocaleTimeString()}] ${message}`);
+    Logger.info(`-->[${new Date().toLocaleTimeString()}] ${message}`);
   }
 
   /**

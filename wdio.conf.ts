@@ -88,15 +88,17 @@ export const config = {
 
     // Simplified afterTest hook
     afterTest: async function (test: any, context: any, { error, result, duration, passed, retries }: { error: any; result: any; duration: any; passed: any; retries: any }) {
+        // Use Logger for test result output
+        const Logger = require('./test/utils/Logger').default;
         if (passed) {
-            console.log('✅ Test PASSED!');
+            Logger.info('✅ Test PASSED!');
         } else {
-            console.log('❌ Test FAILED!');
+            Logger.error('❌ Test FAILED!');
             // Take screenshot on failure
             try {
                 //await browser.saveScreenshot('./test-output/screenshots/failure.png');
             } catch (e) {
-                console.log('Could not save screenshot:', e);
+                Logger.error('Could not save screenshot:', e);
             }
         }
     }

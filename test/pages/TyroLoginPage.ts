@@ -62,11 +62,11 @@ class TyroLoginPage {
     const isPresent = await homeLink.waitForDisplayed({ timeout: 7000, reverse: false }).catch(() => false);
 
     if (isPresent) {
-        console.log("Detected 'Page not found'. Clicking return link...");
+        Logger.info("Detected 'Page not found'. Clicking return link...");
         await homeLink.click();
         await browser.pause(10000); // wait after click for redirect
     } else {
-        console.log("No error link present. Page is normal.");
+        Logger.info("No error link present. Page is normal.");
     }
 
       // Wait for login to complete
