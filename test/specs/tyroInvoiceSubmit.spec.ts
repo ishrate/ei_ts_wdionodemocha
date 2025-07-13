@@ -73,12 +73,11 @@ describe('Tyro Invoice Submission Tests', function () {
 
     // Step 2: Navigate to login page and authenticate
     allure.startStep('Navigate to login page and authenticate');
-    const loginUrl = ConfigReader.getMedipassUrl('login');
-    expect(loginUrl).to.include('medipass');
-    await LoginPage.open(loginUrl);
+    await LoginPage.openLoginPage();
     const currentUrl = await (browser as any).getUrl();
     expect(currentUrl).to.include('medipass');
-    await LoginPage.loginWithEnvironmentCredentials();
+    // Use new AUT/env credential login (defaults to TYRO and current env)
+    await LoginPage.loginWithAutEnvironmentCredentials('tyro');
     await (global as any).browser.waitUntil(async () => {
       const url = await (global as any).browser.getUrl();
       return !url.includes('login');

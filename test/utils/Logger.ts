@@ -72,41 +72,41 @@ class Logger {
 
   // Test specific methods
   logTestStart(testName: string) {
-    this.info(`🚀 Starting test: ${testName}`);
+    this.info(`-->Starting test: ${testName}`);
   }
 
   logTestEnd(testName: string, status: 'PASSED' | 'FAILED') {
-    const emoji = status === 'PASSED' ? '✅' : '❌';
+    const emoji = status === 'PASSED' ? '**SUCCESS**' : '==FAILURE==';
     this.info(`${emoji} Test ${status}: ${testName}`);
   }
 
   logTestStep(stepName: string, details?: any) {
-    this.info(`📋 Step: ${stepName}`, details);
+    this.info(`-->Step: ${stepName}`, details);
   }
 
   logTestData(dataName: string, data: any) {
-    this.info(`📊 Test Data - ${dataName}:`, data);
+    this.info(`-->Test Data - ${dataName}:`, data);
   }
 
   logApiCall(method: string, url: string, response?: any) {
-    this.info(`🌐 API Call: ${method} ${url}`, response);
+    this.info(`-->API Call: ${method} ${url}`, response);
   }
 
   logDatabaseQuery(query: string, params?: any) {
-    this.info(`🗄️ Database Query: ${query}`, params);
+    this.info(`-->Database Query: ${query}`, params);
   }
 
   logPageAction(action: string, element: string, value?: string) {
     const valueText = value ? ` with value: ${value}` : '';
-    this.info(`🖱️ Page Action: ${action} on ${element}${valueText}`);
+    this.info(`-->Page Action: ${action} on ${element}${valueText}`);
   }
 
   logSuccess(message: string, meta?: any) {
-    this.info(`✅ SUCCESS: ${message}`, meta);
+    this.info(`-->SUCCESS: ${message}`, meta);
   }
 
   logFailure(message: string, meta?: any) {
-    this.error(`❌ FAILURE: ${message}`, meta);
+    this.error(`-->FAILURE: ${message}`, meta);
   }
 }
 

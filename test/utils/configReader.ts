@@ -5,6 +5,27 @@ import { decryptSecret } from './decryptUtil';
  * Similar to Java property readers for configuration management
  */
 class ConfigReader {
+  /**
+   * Get AUT/environment-specific credentials (e.g., TYRO_TS2_USERNAME)
+   * @param aut - Application under test (e.g., 'tyro', 'hicap')
+   * @param env - Environment (e.g., 'ts2', 'prod'). Defaults to current env.
+   * @returns object - { username, password }
+   */
+  getAutCredentials(aut: string, env: string = this.getCurrentEnvironment()): { username: string; password: string } {
+    const autUpper = aut.toUpperCase();
+    const envUpper = env.toUpperCase();
+    const userKey = `${autUpper}_${envUpper}_USERNAME`;
+    const passKey = `${autUpper}_${envUpper}_PASSWORD`;
+    const username = process.env[userKey];
+    const password = process.env[passKey];
+    if (!username || !password) {
+      throw new Error(`Credentials not found for AUT: ${aut}, ENV: ${env}. Please set ${userKey} and ${passKey} in .env file`);
+    }
+    return {
+      username,
+      password: this.maybeDecrypt(password)
+    };
+  }
   
   /**
    * Get base URL from browser configuration
@@ -62,85 +83,65 @@ class ConfigReader {
     return process.env.HEADLESS === 'true';
   }
 
-  /**
-   * Get environment specific URL
-   * @param environment - Environment name (dev, qa, prod)
-   * @returns string - Environment specific URL
-   */
-  getEnvironmentUrl(environment: string = 'prod'): string {
-    const urls = {
-      dev: process.env.DEV_URL || 'https://duckduckgo.com',
-      qa: process.env.QA_URL || 'https://duckduckgo.com',
-      staging: process.env.STAGING_URL || 'https://duckduckgo.com',
-      prod: process.env.PROD_URL || 'https://duckduckgo.com'
-    };
-    
-    return urls[environment as keyof typeof urls] || urls.prod;
-  }
-
+  
   /**
    * Get current environment
-   * @returns string - Current environment (dev, qa, staging, prod)
+   * @returns string - Current environment (dev, qa, prod)
    */
   getCurrentEnvironment(): string {
-    return process.env.NODE_ENV || process.env.ENVIRONMENT || 'prod';
+    // Prefer ENVIRONMENT over NODE_ENV for test environment selection
+    return process.env.ENVIRONMENT || process.env.NODE_ENV || 'prod';
   }
 
-  /**
-   * Get login URL from configuration
-   * @returns string - Login URL for the application
-   */
-  getLoginUrl(): string {
-    return process.env.LOGIN_URL || `${this.getBaseUrl()}/login`;
-  }
-
-  // ==================== MULTIPLE AUT SUPPORT ====================
+  
+  // ==================== MULTI-AUT & ENV SUPPORT (NEW PATTERN) ====================
 
   /**
-   * Get URL for specific AUT (Application Under Test)
-   * @param autName - Name of the AUT (medipass, duckduckgo)
-   * @param urlType - Type of URL (base, login, search)
-   * @returns string - URL for the specified AUT
+   * Get URL for a specific AUT (Application Under Test) and environment
+   * @param aut - AUT key (e.g., 'medipass', 'lanternpay', 'commhealth')
+   * @param env - Environment key (e.g., 'ts2', 'prod'). Defaults to current env.
+   * @returns string - URL for the specified AUT and environment
    */
-  getAutUrl(autName: string, urlType: string = 'base'): string {
-    const autUpper = autName.toUpperCase();
-    const urlTypeUpper = urlType.toUpperCase();
-    
-    let envKey: string;
-    if (urlType === 'base') {
-      envKey = `${autUpper}_BASE_URL`;
-    } else {
-      envKey = `${autUpper}_${urlTypeUpper}_URL`;
-    }
-    
+  getAutUrl(aut: string, env: string = this.getCurrentEnvironment()): string {
+    const autUpper = aut.toUpperCase();
+    const envUpper = env.toUpperCase();
+    const envKey = `${autUpper}_${envUpper}_URL`;
     const url = process.env[envKey];
     if (!url) {
-      throw new Error(`URL not found for AUT: ${autName}, type: ${urlType}. Please set ${envKey} in .env file`);
+      throw new Error(`URL not found for AUT: ${aut}, ENV: ${env}. Please set ${envKey} in .env file`);
     }
-    
     return url;
   }
 
   /**
-   * Get Medipass application URLs
+   * Get base URL for Tyro (Medipass) AUT
+   * @param env - Environment key (e.g., 'ts2', 'prod'). Defaults to current env.
    */
-  getMedipassUrl(urlType: string = 'base'): string {
-    return this.getAutUrl('medipass', urlType);
+  getTyroUrl(env: string = this.getCurrentEnvironment()): string {
+    return this.getAutUrl('tyro', env);
   }
 
   /**
-   * Get DuckDuckGo URLs
+   * Get base URL for HICAP (LanternPay) AUT
+   * @param env - Environment key (e.g., 'ts2', 'prod'). Defaults to current env.
    */
-  getDuckDuckGoUrl(urlType: string = 'base'): string {
-    return this.getAutUrl('duckduckgo', urlType);
+  getHicapUrl(env: string = this.getCurrentEnvironment()): string {
+    return this.getAutUrl('lanternpay', env);
   }
 
   /**
-   * Get search URL (backward compatibility)
-   * @returns string - Search URL (defaults to DuckDuckGo)
+   * Get base URL for COMMHEALTH (future expansion)
+   * @param env - Environment key (e.g., 'ts2', 'prod'). Defaults to current env.
+   */
+  getCommhealthUrl(env: string = this.getCurrentEnvironment()): string {
+    return this.getAutUrl('commhealth', env);
+  }
+
+  /**
+   * Get search URL (defaults to Tyro/Medipass, can be overridden by SEARCH_URL)
    */
   getSearchUrl(): string {
-    return process.env.SEARCH_URL || this.getDuckDuckGoUrl('base');
+    return process.env.SEARCH_URL || this.getTyroUrl();
   }
 
   /**
@@ -159,76 +160,6 @@ class ConfigReader {
     }
   }
 
-  // ==================== CREDENTIAL MANAGEMENT ====================
-
-  /**
-   * Get test username for login
-   * @param userType - Type of user (test, admin, dev, qa, staging)
-   * @returns string - Username for login
-   */
-  getUsername(userType: string = 'test'): string {
-    const userTypeUpper = userType.toUpperCase();
-    const envKey = `${userTypeUpper}_USERNAME`;
-    const username = process.env[envKey];
-    
-    if (!username) {
-      throw new Error(`Username not found for user type: ${userType}. Please set ${envKey} in .env file`);
-    }
-    
-    return username;
-  }
-
-  /**
-   * Get test password for login
-   * @param userType - Type of user (test, admin, dev, qa, staging)
-   * @returns string - Password for login
-   */
-  getPassword(userType: string = 'test'): string {
-    const userTypeUpper = userType.toUpperCase();
-    const envKey = `${userTypeUpper}_PASSWORD`;
-    const password = process.env[envKey];
-    if (!password) {
-      throw new Error(`Password not found for user type: ${userType}. Please set ${envKey} in .env file`);
-    }
-    return this.maybeDecrypt(password);
-  }
-
-  /**
-   * Get user credentials as an object
-   * @param userType - Type of user (test, admin, dev, qa, staging)
-   * @returns object - Object containing username and password
-   */
-  getCredentials(userType: string = 'test'): { username: string; password: string } {
-    return {
-      username: this.getUsername(userType),
-      password: this.getPassword(userType)
-    };
-  }
-
-  /**
-   * Get environment-specific credentials
-   * Uses current environment to determine user type
-   * @returns object - Object containing username and password
-   */
-  getEnvironmentCredentials(): { username: string; password: string } {
-    const env = this.getCurrentEnvironment();
-    const userType = env === 'prod' ? 'test' : env; // Use 'test' for prod, otherwise use env name
-    return this.getCredentials(userType);
-  }
-
-  /**
-   * Validate that required credentials are available
-   * @param userType - Type of user to validate
-   * @returns boolean - True if credentials are available
-   */
-  validateCredentials(userType: string = 'test'): boolean {
-    try {
-      this.getCredentials(userType);
-      return true;
-    } catch {
-      return false;
-    }
-  }
 
   // ==================== DATABASE CONFIGURATION ====================
 

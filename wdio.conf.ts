@@ -2,8 +2,17 @@ import * as dotenv from 'dotenv';
 
 /// <reference types="webdriverio/sync" />
 
+
 // Load environment variables
 dotenv.config();
+
+// Debug log: print environment variables at config load time
+// eslint-disable-next-line no-console
+console.log('[WDIO DEBUG] NODE_ENV:', process.env.NODE_ENV);
+// eslint-disable-next-line no-console
+console.log('[WDIO DEBUG] ENVIRONMENT:', process.env.ENVIRONMENT);
+// eslint-disable-next-line no-console
+console.log('[WDIO DEBUG] BASE_URL:', process.env.BASE_URL);
 
 export const config = {
     // Runner Configuration
@@ -91,9 +100,9 @@ export const config = {
         // Use Logger for test result output
         const Logger = require('./test/utils/Logger').default;
         if (passed) {
-            Logger.info('✅ Test PASSED!');
+            Logger.info('-->Test PASSED!');
         } else {
-            Logger.error('❌ Test FAILED!');
+            Logger.error('-->Test FAILED!');
             // Take screenshot on failure
             try {
                 //await browser.saveScreenshot('./test-output/screenshots/failure.png');

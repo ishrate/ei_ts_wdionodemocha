@@ -8,6 +8,40 @@ import Logger from '../utils/Logger';
 //import type { ChainablePromiseElement } from 'webdriverio';
 
 class TyroLoginPage {
+  /**
+   * Logs in using AUT/environment-specific credentials (e.g., TYRO_TS2_USERNAME)
+   * @param aut - Application under test (e.g., 'tyro')
+   * @param env - Environment (e.g., 'ts2', 'prod'). Defaults to current env.
+   */
+  async loginWithAutEnvironmentCredentials(aut: string = 'tyro', env?: string) {
+    Logger.logTestStep(`Logging in with ${aut.toUpperCase()} credentials for env: ${env || 'current'}`);
+    try {
+      const credentials = ConfigReader.getAutCredentials(aut, env);
+      Logger.debug('Retrieved AUT credentials from config', { username: credentials.username });
+      await this.login(credentials.username, credentials.password);
+      Logger.logSuccess('Successfully logged in with AUT/environment credentials');
+    } catch (error) {
+      Logger.logFailure('Failed to login with AUT/environment credentials', error);
+      throw error;
+    }
+  }
+  /**
+   * Opens the Tyro (Medipass) login page using the new multi-AUT config pattern.
+   * Uses ConfigReader.getTyroUrl() and appends '/login'.
+   * Optionally accepts an override URL for flexibility.
+   */
+  async openLoginPage(urlOverride?: string) {
+    let loginUrl: string;
+    if (urlOverride) {
+      loginUrl = urlOverride;
+    } else {
+      // Use the new multi-AUT config pattern for Tyro/Medipass login
+      const baseUrl = ConfigReader.getTyroUrl();
+      loginUrl = baseUrl.endsWith('/') ? `${baseUrl}login` : `${baseUrl}/login`;
+    }
+    Logger.logTestStep('Opening Tyro login page', { loginUrl });
+    await this.open(loginUrl);
+  }
   private pageObject = LoginPageObject;
 
   /**
@@ -81,21 +115,18 @@ class TyroLoginPage {
   }
 
   /**
-   * A helper method that logs in using credentials from the config.
+   * A helper method that logs in using credentials from the new multi-AUT config (.env pattern: <AUT>_<ENV>_USERNAME/PASSWORD)
+   * Defaults to 'tyro' and current environment if not specified.
    */
-  async loginWithEnvironmentCredentials() {
-    Logger.logTestStep('Logging in with environment credentials');
-
+  async loginWithEnvironmentCredentials(aut: string = 'tyro', env?: string) {
+    Logger.logTestStep(`Logging in with ${aut.toUpperCase()} credentials for env: ${env || 'current'}`);
     try {
-      // Get credentials from config
-      const credentials = ConfigReader.getCredentials('DEV');
-      Logger.debug('Retrieved credentials from config', { username: credentials.username });
-
+      const credentials = ConfigReader.getAutCredentials(aut, env);
+      Logger.debug('Retrieved AUT credentials from config', { username: credentials.username });
       await this.login(credentials.username, credentials.password);
-
-      Logger.logSuccess('Successfully logged in with environment credentials');
+      Logger.logSuccess('Successfully logged in with AUT/environment credentials');
     } catch (error) {
-      Logger.logFailure('Failed to login with environment credentials', error);
+      Logger.logFailure('Failed to login with AUT/environment credentials', error);
       throw error;
     }
   }

@@ -16,6 +16,7 @@ class BaseTest {
    * Equivalent to @BeforeMethod in TestNG or @Before in JUnit
    */
   static async beforeEach() {
+    Logger.info(`[DEBUG] NODE_ENV: ${process.env.NODE_ENV}, ENVIRONMENT: ${process.env.ENVIRONMENT}`);
     Logger.info(`-->Starting test: ${this.getCurrentTestName()}`);
     Logger.info(`-->Environment: ${ConfigReader.getCurrentEnvironment()}`);
     Logger.info(`-->Base URL: ${ConfigReader.getBaseUrl()}`);
