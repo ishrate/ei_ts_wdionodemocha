@@ -2,18 +2,18 @@
 
 //LoginPage - Contains page actions and methods for login functionality
 
-import LoginPageObject from '../pageobjects/TyroLoginObject';
+import LoginPageObject from '../pageobjects/HicapLoginObject';
 import ConfigReader from '../utils/configReader';
 import Logger from '../utils/Logger';
 //import type { ChainablePromiseElement } from 'webdriverio';
 
-class TyroLoginPage {
+class HicapLoginPage {
   /**
-   * Logs in using AUT/environment-specific credentials (e.g., TYRO_TS2_USERNAME)
-   * @param aut - Application under test (e.g., 'tyro')
+   * Logs in using AUT/environment-specific credentials (e.g., HICAP_TS2_USERNAME)
+   * @param aut - Application under test (e.g., 'hicap')
    * @param env - Environment (e.g., 'ts2', 'prod'). Defaults to current env.
    */
-  async loginWithAutEnvironmentCredentials(aut: string = 'tyro', env?: string) {
+  async loginWithAutEnvironmentCredentials(aut: string = 'hicap', env?: string) {
     Logger.logTestStep(`Logging in with ${aut.toUpperCase()} credentials for env: ${env || 'current'}`);
     try {
       const credentials = ConfigReader.getAutCredentials(aut, env);
@@ -26,19 +26,20 @@ class TyroLoginPage {
     }
   }
   /**
-   * Opens the Tyro (Medipass) login page using the new multi-AUT config pattern.
-   * Uses ConfigReader.getTyroUrl() and appends '/login'.
-   *    */
+   * Opens the Hicap login page using the new multi-AUT config pattern.
+   * Uses ConfigReader.getHicapUrl() and appends '/login'.
+   *
+   */
   async openLoginPage(urlOverride?: string) {
     let loginUrl: string;
     if (urlOverride) {
       loginUrl = urlOverride;
     } else {
       // Use the new multi-AUT config pattern for Tyro/Medipass login
-      const baseUrl = ConfigReader.getTyroUrl();
+      const baseUrl = ConfigReader.getHicapUrl();
       loginUrl = baseUrl.endsWith('/') ? `${baseUrl}login` : `${baseUrl}/login`;
     }
-    Logger.logTestStep('Opening Tyro login page', { loginUrl });
+    Logger.logTestStep('Opening Hicap login page', { loginUrl });
     await this.open(loginUrl);
   }
   private pageObject = LoginPageObject;
@@ -90,17 +91,17 @@ class TyroLoginPage {
 
     await browser.pause(7000); // simulate page load buffer (adjust if needed)
 
-    const homeLink = $("//a[contains(text(), 'Click here to go home')]");
+    const popUp = $("//button[text()='Ok']");
 
     // Wait up to 10 seconds until it's displayed (if exists)
-    const isPresent = await homeLink.waitForDisplayed({ timeout: 7000, reverse: false }).catch(() => false);
+    const isPresent = await popUp.waitForDisplayed({ timeout: 7000, reverse: false }).catch(() => false);
 
     if (isPresent) {
-        Logger.info("Detected 'Page not found'. Clicking return link...");
-        await homeLink.click();
+        Logger.info("Detected popup. Clicking OK...");
+        await popUp.click();
         await browser.pause(10000); // wait after click for redirect
     } else {
-        Logger.info("No error link present. Page is normal.");
+        Logger.info("No popup present. Page is normal.");
     }
 
       // Wait for login to complete
@@ -116,9 +117,9 @@ class TyroLoginPage {
 
   /**
    * A helper method that logs in using credentials from the new multi-AUT config (.env pattern: <AUT>_<ENV>_USERNAME/PASSWORD)
-   * Defaults to 'tyro' and current environment if not specified.
+   * Defaults to 'hicap' and current environment if not specified.
    */
-  async loginWithEnvironmentCredentials(aut: string = 'tyro', env?: string) {
+  async loginWithEnvironmentCredentials(aut: string = 'hicap', env?: string) {
     Logger.logTestStep(`Logging in with ${aut.toUpperCase()} credentials for env: ${env || 'current'}`);
     try {
       const credentials = ConfigReader.getAutCredentials(aut, env);
@@ -186,9 +187,7 @@ class TyroLoginPage {
     }
   }
 
-  /**
-   * Logout
-   */
+  
 }
 
-export default new TyroLoginPage();
+export default new HicapLoginPage();

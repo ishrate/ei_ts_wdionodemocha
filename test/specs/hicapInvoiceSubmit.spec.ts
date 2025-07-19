@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import allure from '@wdio/allure-reporter';
 import DatabaseHelper from '../utils/DatabaseHelper';
-import LoginPage from '../pages/TyroLoginPage';
-import TyroInvoiceEntry from '../pages/TyroInvoiceEntryPage';
-import { TyroInvoiceValidationPage } from '../pages/TyroInvoiceValidationPage';
+import LoginPage from '../pages/HicapLoginPage';
+import HicapInvoiceEntry from '../pages/HicapInvoiceEntryPage';
+import { HicapInvoiceValidationPage } from '../pages/HicapInvoiceValidationPage';
 import ConfigReader from '../utils/configReader';
 import BaseTest from '../utils/BaseTest';
 import xmlDataReader from '../utils/xmlDataReader';
@@ -11,16 +11,15 @@ import Logger from '../utils/Logger';
 
 declare global {
   // eslint-disable-next-line no-var
-  var submittedInvoiceData: {
+  var submittedHicapInvoiceData: {
     invoiceRef: string;
-    gatewayReference: string;
-    tyroReference: string;
-    claimStatus: string;
     submissionTime: string;
+    invoiceStatus: string;
+    invoiceNumber: string;
   };
 }
 
-describe('Tyro Invoice Submission Tests', function () {
+describe('Hicap Invoice Submission Tests', function () {
   this.timeout(350000);
 
   beforeEach(async function () {
@@ -49,7 +48,7 @@ describe('Tyro Invoice Submission Tests', function () {
     // Step 1: Fetch and validate invoice data from XML
     allure.startStep('Fetch and validate invoice data from XML');
     try {
-      invoiceData = await xmlDataReader.getSectionData('invoiceData.xml', 'standardInvoice');
+      invoiceData = await xmlDataReader.getSectionData('invoiceData.xml', 'hicapInvoice');
       allure.addAttachment('Fetched invoiceData', JSON.stringify(invoiceData, null, 2), 'application/json');
       expect(invoiceData).to.not.be.null;
       expect(invoiceData).to.be.an('object');
@@ -75,9 +74,9 @@ describe('Tyro Invoice Submission Tests', function () {
     allure.startStep('Navigate to login page and authenticate');
     await LoginPage.openLoginPage();
     const currentUrl = await (browser as any).getUrl();
-    expect(currentUrl).to.include('medipass');
+    expect(currentUrl).to.include('lanternpay');
     // Use new AUT/env credential login (defaults to TYRO and current env)
-    await LoginPage.loginWithAutEnvironmentCredentials('tyro');
+    await LoginPage.loginWithAutEnvironmentCredentials('hicap');
     await (global as any).browser.waitUntil(async () => {
       const url = await (global as any).browser.getUrl();
       return !url.includes('login');
@@ -91,7 +90,7 @@ describe('Tyro Invoice Submission Tests', function () {
 
     // Step 3: Complete invoice entry form
     allure.startStep('Complete invoice entry form');
-    await TyroInvoiceEntry.completeInvoiceEntry(invoiceRef, location, provider, injuredWorker, item);
+    await HicapInvoiceEntry.completeInvoiceEntry(invoiceRef, location, injuredWorker, provider, item);
     await (global as any).browser.waitUntil(async () => {
       const readyState = await (global as any).browser.execute(() => document.readyState);
       return readyState === 'complete';
@@ -103,25 +102,23 @@ describe('Tyro Invoice Submission Tests', function () {
 
     // Step 4: Validate invoice submission results from UI
     allure.startStep('Validate invoice submission results from UI');
-    const validationPage = new TyroInvoiceValidationPage();
+    const validationPage = new HicapInvoiceValidationPage();
     
     const validationResults = await validationPage.getInvoiceValidationValues();
     allure.addAttachment('Validation Results', JSON.stringify(validationResults, null, 2), 'application/json');
     expect(validationResults).to.not.be.null;
     expect(validationResults).to.be.an('object');
-    expect(validationResults.claimStatus).to.not.be.empty;
-    expect(validationResults.gatewayReference).to.not.be.empty;
-    expect(validationResults.tyroReference).to.not.be.empty;
+    expect(validationResults.invoiceStatus).to.not.be.empty;
+    expect(validationResults.invoiceNumber).to.not.be.empty;
     allure.endStep();
 
     // Step 5: Store validation results for database comparison
     allure.startStep('Store validation results for database comparison');
     const submissionTime = new Date().toISOString();
-    global.submittedInvoiceData = {
+    global.submittedHicapInvoiceData = {
       invoiceRef: invoiceRef,
-      gatewayReference: validationResults.gatewayReference,
-      tyroReference: validationResults.tyroReference,
-      claimStatus: validationResults.claimStatus,
+      invoiceStatus: validationResults.invoiceStatus,
+      invoiceNumber: validationResults.invoiceNumber,
       submissionTime: submissionTime
     };
     allure.endStep();
@@ -132,7 +129,7 @@ describe('Tyro Invoice Submission Tests', function () {
 
 //Tempus DB validatoin test
 
-describe('Tyro Invoice Database Validation Tests', function () {
+describe('Hicap Invoice Database Validation Tests', function () {
   this.timeout(150000);
 
   let dbConnection: any;
@@ -158,11 +155,14 @@ describe('Tyro Invoice Database Validation Tests', function () {
   });
 
   it('should validate submitted invoice data in Oracle database', async function () {
-    const submittedData = global.submittedInvoiceData;
+    const submittedData = global.submittedHicapInvoiceData;
 
     expect(submittedData).to.not.be.null;
     expect(submittedData).to.not.be.undefined;
-    expect(submittedData.gatewayReference).to.not.be.empty;
+    expect(submittedData.invoiceNumber).to.not.be.empty;
+
+    
+
 
     if (!submittedData) {
       throw new Error('No submitted invoice data found. Please run the invoice submission test first.');
@@ -170,15 +170,19 @@ describe('Tyro Invoice Database Validation Tests', function () {
 
     BaseTest.logTestInfo('Validating submitted invoice data in Oracle database');
 
+    submittedData.invoiceNumber = "20250714648"
+
+    const queryParams = {
+      invoiceRef: submittedData.invoiceNumber
+    };
+
     const dbQuery = `
       SELECT INVOICE_PAYEE_TYPE, INVOICE_STATUS, CLAIM_NBR, INVOICE_SUBMITTED_DATE 
       FROM STD_INVOICE 
-      WHERE INVOICE_ID = :gatewayRef
+      WHERE INVOICE_REF_NBR = :invoiceRef
     `;
 
-    const queryParams = {
-      gatewayRef: submittedData.gatewayReference
-    };
+    
 
     let dbResults;
     try {
@@ -197,7 +201,7 @@ describe('Tyro Invoice Database Validation Tests', function () {
 
     expect(dbInvoice).to.not.be.null;
     expect(dbInvoice.INVOICE_PAYEE_TYPE).to.not.be.null;
-    // Defensive debug: print full DB row if status is missing
+    // print full DB row if status is missing
     if (!('INVOICE_STATUS' in dbInvoice)) {
       Logger.error('INVOICE_STATUS missing from DB row: ' + JSON.stringify(dbInvoice, null, 2));
     }
@@ -209,7 +213,7 @@ describe('Tyro Invoice Database Validation Tests', function () {
     Logger.info('Here are Invoice Data retrieved from Tempus BD TS2: ' + JSON.stringify(dbInvoice, null, 2));
     Logger.info('================================================================');
 
-    // Safe, case-sensitive status check (matches DB value exactly)
+    // case-sensitive status check (matches DB value exactly)
     if (dbInvoice.INVOICE_STATUS === undefined) {
       throw new Error('INVOICE_STATUS is undefined in DB result! Full row: ' + JSON.stringify(dbInvoice));
     }
@@ -221,6 +225,6 @@ describe('Tyro Invoice Database Validation Tests', function () {
     BaseTest.logTestSuccess('Database validation completed successfully');
   });
 
- 
+  
 });
 

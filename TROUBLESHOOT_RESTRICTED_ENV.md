@@ -21,7 +21,7 @@ Node.js and npm may also fail to install packages or verify SSL certificates due
    - Disable strict SSL if your company uses SSL interception.
    - Set Node.js to ignore unauthorized TLS certificates if needed.
 
-## Step-by-Step Resolution
+## Resolution
 
 ### 1. Uninstall WDIO v9+ and Related Packages
 ```powershell
@@ -78,7 +78,7 @@ npm config set strict-ssl false
 ## Recommendations
 - Use WDIO v8 for maximum control in restricted environments.
 - Always use a manually managed driver and avoid auto-download features.
-- Document your proxy and security setup for future team members.
+- Document your proxy and security setup.
 - Keep a copy of this troubleshooting guide in your repo.
 
 ---

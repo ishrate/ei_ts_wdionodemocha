@@ -2,15 +2,15 @@
 
 A comprehensive WebdriverIO automation framework using TypeScript, following Java Selenium POM patterns.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 WdiotsmochaAuto/
-├── resources/                    # 📚 Static resources (included in Git)
+├── resources/                    # Static resources (included in Git)
 │   ├── config/                   # Configuration files
 │   └── data/                     # Test data files (XML, JSON, etc.)
 │       └── searchData.xml        # XML test data
-├── test/                         # 🧪 Test source code
+├── test/                         # Test source code
 │   ├── pageobjects/              # Page Object Model classes
 │   │   ├── BasePage.ts           # Base page class (like Java)
 │   │   └── SearchPage.ts         # Search page object
@@ -20,7 +20,7 @@ WdiotsmochaAuto/
 │       ├── BaseTest.ts           # Base test class (like Java)
 │       ├── configReader.ts       # Configuration reader
 │       └── xmlDataReader.ts      # XML data reader utility
-├── test-output/                  # 📊 Generated files (excluded from Git)
+├── test-output/                  # Generated files (excluded from Git)
 │   ├── screenshots/              # Test screenshots
 │   ├── logs/                     # Test execution logs
 │   ├── allure-results/           # Allure test results
@@ -33,7 +33,7 @@ WdiotsmochaAuto/
 └── .dockerignore                 # Docker ignore rules
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Install Dependencies
 ```bash
@@ -72,19 +72,19 @@ npm run report:allure
 npm run report:open
 ```
 
-## 📂 Folder Organization
+## Folder Organization
 
-### 📚 **Resources Folder** (Included in Git/Docker)
+### **Resources Folder** (Included in Git/Docker)
 - **`resources/config/`**: Configuration files for different environments
 - **`resources/data/`**: Test data files (XML, JSON, CSV)
 
-### 📊 **Test Output Folder** (Excluded from Git/Docker)
+### **Test Output Folder** (Excluded from Git/Docker)
 - **`test-output/screenshots/`**: Automatic screenshots on test failures
 - **`test-output/logs/`**: Test execution logs
 - **`test-output/allure-results/`**: Raw Allure test results
 - **`test-output/reports/`**: Generated HTML reports
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables (.env)
 ```properties
@@ -102,7 +102,7 @@ PAGE_LOAD_TIMEOUT=10000
 ELEMENT_WAIT_TIMEOUT=5000
 ```
 
-## 🔒 Using Encrypted Passwords in .env
+##  Using Encrypted Passwords in .env
 
 To keep your credentials secure, this project supports encrypted passwords for application and database logins. You can use either plain text or encrypted values in your `.env` file.
 
@@ -142,7 +142,7 @@ To keep your credentials secure, this project supports encrypted passwords for a
 
 ---
 
-## 📊 Allure Report Generation & Viewing
+## Allure Report Generation & Viewing
 
 This project provides a PowerShell script to automate Allure report generation, archiving, and viewing.
 
@@ -169,14 +169,14 @@ This project provides a PowerShell script to automate Allure report generation, 
 
 **For more details, see the troubleshooting guide and comments in the relevant scripts.**
 
-## 🐳 Docker Integration
+## Docker Integration
 
 The `.dockerignore` file excludes:
 - `test-output/` - Generated test artifacts
 - `node_modules/` - Will be installed in container
 - Development files and logs
 
-## 📋 Git Integration
+## Git Integration
 
 The `.gitignore` file excludes:
 - `test-output/` - All generated test files
@@ -184,7 +184,7 @@ The `.gitignore` file excludes:
 - Environment-specific files
 - IDE and OS files
 
-## 🏗️ Java Selenium Equivalent
+## Java Selenium Equivalent
 
 This framework follows Java Selenium patterns:
 
@@ -198,14 +198,14 @@ This framework follows Java Selenium patterns:
 | TestNG XML | XML files in `resources/data/` |
 | Maven target/| `test-output/` |
 
-## 📈 Reporting
+## Reporting
 
 - **Console Output**: Real-time test execution logs
 - **Allure Reports**: Comprehensive HTML reports with screenshots
 - **Screenshots**: Automatic capture on test failures
 - **Test Logs**: Detailed execution logs in `test-output/logs/`
 
-## 🔄 CI/CD Ready
+## CI/CD Ready
 
 The folder structure is optimized for:
 - **Git**: Only source code and resources are tracked
@@ -214,7 +214,7 @@ The folder structure is optimized for:
 
 ---
 
-## 🔐 Secure Credential Management (Cross-Platform)
+## Secure Credential Management (Cross-Platform)
 
 This project supports encrypted secrets for all sensitive credentials (DB/app passwords) in `.env`.
 

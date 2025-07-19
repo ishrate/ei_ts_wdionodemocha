@@ -9,12 +9,12 @@
     <description>Standard invoice description</description>
   </standardInvoice>
   
-  <urgentInvoice>
+  <hicapInvoice>
     <invoiceRef>URG-INV-002</invoiceRef>
-    <location>Emergency Care Center</location>
-    <provider>Urgent Care Physio</provider>
-    <injuredWorker>John Doe</injuredWorker>
-    <item>AP002</item>
-    <description>Urgent care invoice description</description>
-  </urgentInvoice>
-</testData>
+    <location>WorkSafe Victoria</location>
+    <provider>Mt ABLITT PHYSIO (Physiotherapist)</provider>
+    <injuredWorker>Earlof Lemongrab</injuredWorker>
+    <item>AP001</item>
+    <description>Hicap invoice description</description>
+  </hicapInvoice>
+</testData> 

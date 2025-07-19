@@ -17,28 +17,51 @@ console.log('[WDIO DEBUG] BASE_URL:', process.env.BASE_URL);
 export const config = {
     // Runner Configuration
     runner: 'local',
-    
+
     // Test Files
     specs: [
-          './test/specs/simple.spec.ts'
+        './test/specs/simple.spec.ts'
     ],
-    
+
     // Capabilities
     maxInstances: 1,
-    capabilities: [{
-        browserName: 'chrome',
-        acceptInsecureCerts: true,
-        'goog:chromeOptions': {
-            args: [
-                ...(process.env.HEADLESS === 'true' ? ['--headless=new'] : []),
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--ignore-certificate-errors',
-                '--ignore-ssl-errors'
-            ]
+    capabilities: [(() => {
+        // Default Chrome options
+        const chromeOptions = [
+            ...(process.env.HEADLESS === 'true' ? ['--headless=new'] : []),
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--ignore-certificate-errors',
+            '--ignore-ssl-errors'
+        ];
+
+        // Auto-detect if HICAP test is running (by spec filename or ENV)
+        const isHicap =
+            (process.env.AUT && process.env.AUT.toLowerCase() === 'hicap') ||
+            (process.env.TEST_AUT && process.env.TEST_AUT.toLowerCase() === 'hicap') ||
+            (Array.isArray(process.argv) && process.argv.some(arg => arg.toLowerCase().includes('hicap')));
+
+        if (isHicap) {
+            const userAgent = process.env.HICAP_USER_AGENT;
+            if (userAgent) {
+                chromeOptions.push(`--user-agent=${userAgent}`);
+                // eslint-disable-next-line no-console
+                console.log('[WDIO DEBUG] Using HICAP user-agent:', userAgent);
+            } else {
+                // eslint-disable-next-line no-console
+                console.warn('[WDIO WARNING] HICAP_USER_AGENT not set in .env, but HICAP test detected.');
+            }
         }
-    }],
+
+        return {
+            browserName: 'chrome',
+            acceptInsecureCerts: true,
+            'goog:chromeOptions': {
+                args: chromeOptions
+            }
+        };
+    })()],
     
     // Test Configuration
     logLevel: 'info',

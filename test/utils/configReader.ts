@@ -126,7 +126,7 @@ class ConfigReader {
    * @param env - Environment key (e.g., 'ts2', 'prod'). Defaults to current env.
    */
   getHicapUrl(env: string = this.getCurrentEnvironment()): string {
-    return this.getAutUrl('lanternpay', env);
+    return this.getAutUrl('hicap', env);
   }
 
   /**
