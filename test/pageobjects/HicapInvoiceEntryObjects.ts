@@ -1,5 +1,4 @@
-
-  
+// Author: Eamon Ishrat- Automation Architect
 class HicapInvoiceEntryObjects {
   // ==================== LOCATORS ====================
   readonly INVOICE_LINK = "//a[text()='Invoices']";

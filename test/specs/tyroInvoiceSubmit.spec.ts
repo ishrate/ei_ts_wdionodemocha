@@ -1,3 +1,4 @@
+// Author: Eamon Ishrat- Automation Architect
 import { expect } from 'chai';
 import allure from '@wdio/allure-reporter';
 import DatabaseHelper from '../utils/DatabaseHelper';

@@ -1,3 +1,4 @@
+// Author: Eamon Ishrat- Automation Architect
 export class TyroInvoiceValidationObjects {
     // Locators as readonly properties
     public readonly CLAIM_STATUS = ".//h2[normalize-space()='Invoice overview']//following-sibling::div//label[normalize-space()='wsv claim status']//following::span[1]";

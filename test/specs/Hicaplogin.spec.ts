@@ -1,3 +1,4 @@
+// Author: Eamon Ishrat- Automation Architect
 import { expect } from 'chai';
 import LoginPage from '../pages/HicapLoginPage';
 import ConfigReader from '../utils/configReader';

@@ -1,3 +1,4 @@
+// Author: Eamon Ishrat- Automation Architect
 class TyroInvoiceEntryObjects {
   // ==================== LOCATORS ====================
   readonly GETPAID_LINK = "//p[normalize-space()='Get paid']";

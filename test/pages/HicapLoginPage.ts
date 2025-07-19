@@ -1,3 +1,4 @@
+// Author: Eamon Ishrat- Automation Architect
 /// <reference types="@wdio/globals/types" />
 
 //LoginPage - Contains page actions and methods for login functionality

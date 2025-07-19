@@ -1,3 +1,4 @@
+<!-- Author: Eamon Ishrat- Automation Architect -->
 # WebdriverIO TypeScript Automation Framework
 
 A comprehensive WebdriverIO automation framework using TypeScript, following Java Selenium POM patterns.

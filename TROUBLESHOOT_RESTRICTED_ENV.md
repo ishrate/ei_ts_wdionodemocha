@@ -1,3 +1,4 @@
+<!-- Author: Eamon Ishrat- Automation Architect -->
 # WebdriverIO (WDIO) & Node.js Troubleshooting in Corporate Restricted Environments
 
 ## Problem Summary
