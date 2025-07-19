@@ -109,7 +109,7 @@ To keep your credentials secure, this project supports encrypted passwords for a
 ### How to Encrypt and Use Passwords
 
 1. **Choose a Secret Key**
-   - Example: `Qw7!pL9z$2rT8vB6@xF3eS1mN0yU5hJ4` (generate your own and keep it safe!)
+   - Example: `Qw7!pL9z$2rT8v56B6@xF3eS1mN0yU5785` (generate your own and keep it safe!)
 
 2. **Encrypt Your Password**
    - In your project root, run:
@@ -221,7 +221,7 @@ This project supports encrypted secrets for all sensitive credentials (DB/app pa
 ### How to Encrypt and Use Passwords
 
 1. **Choose a Secret Key**
-   - Example: `Qw7!pL9z$2rT8vB6@xF3eS1mN0yU5hJ4` (generate your own and keep it safe!)
+   - Example: `Qw7!pL9z$2rT8v89B6@xF3eS1mN0yU12774` (generate your own and keep it safe!)
 
 2. **Encrypt Your Password**
    - In your project root, run:
