@@ -258,7 +258,7 @@ set BASE_URL=https://your-test-environment.com
 
 ---
 
-## 🔐 Secure Credential Management (Cross-Platform)
+## Secure Credential Management (Cross-Platform)
 
 This project supports encrypted secrets for all sensitive credentials (DB/app passwords) in `.env`.
 
@@ -345,4 +345,4 @@ For issues or questions, refer to:
 
 **Last Updated:** July 7, 2025  
 **Version:** 1.0  
-**Author:** Setup Guide for eiwdiotsmocha project
+**Author:** Eamon Ishrat

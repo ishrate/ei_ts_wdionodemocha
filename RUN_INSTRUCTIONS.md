@@ -49,5 +49,5 @@ $env:DECRYPT_SECRET="your_secret_key_here"; npx wdio run wdio.conf.ts --spec tes
 
 ---
 
-For any questions, contact the automation team.
-Qw7!pL9z$2rT8vB6@xF3eS1mN0yU5hJ4
+For any questions, contact Eamon Ishrat.
+

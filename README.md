@@ -234,7 +234,7 @@ This project supports encrypted secrets for all sensitive credentials (DB/app pa
    - Replace the plain password with the encrypted string (no quotes):
      ```properties
      DEV_PASSWORD=ENCRYPTED_STRING_HERE
-     TEST_PASSWORD=ENCRYPTED_STRING_HERE
+     TS2_PASSWORD=ENCRYPTED_STRING_HERE
      DB_PASSWORD=ENCRYPTED_STRING_HERE
      ```
 
